@@ -72,7 +72,7 @@ export default function ProductForm({
 
   return (
     <form
-      onSubmit={onSubmit} encType="multipart/form-data" 
+      onSubmit={onSubmit} encType="multipart/form-data"
       className="w-full space-y-6 p-8 bg-white shadow-lg rounded-xl"
     >
       <label className={labelStyle} htmlFor="name">
@@ -121,7 +121,7 @@ export default function ProductForm({
         min="0" step="1" // 0以上の整数のみ許可
         defaultValue={initialValues.stock} className={inputStyle}
       />
-     <label className={labelStyle} htmlFor="isFeatured" >
+      <label className={labelStyle} htmlFor="isFeatured" >
         <input
           type="checkbox" id="isFeatured" name="isFeatured"
           defaultChecked={initialValues.is_featured} className="mr-2"
