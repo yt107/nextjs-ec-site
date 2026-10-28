@@ -73,7 +73,6 @@ export async function GET(request: NextRequest) {
         ${where}
         GROUP BY
           p.id, p.name, p.price, p.stock, p.image_url, p.updated_at
-        ${where}
         ${order}
         LIMIT ?
         OFFSET ?
