@@ -4,9 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { type ProductData } from '@/types/product';
 import { type ReviewsResponse } from '@/types/review';
-import { isLoggedIn } from '@/lib/auth';
+import { AUTH_TOKEN, isLoggedIn } from '@/lib/auth';
 import CartControls from '@/app/products/[id]/CartControls';
 import ReviewControls from '@/app/products/[id]/ReviewControls';
+import { cookies } from 'next/headers'; // クッキー取得用
+import FavoriteControls from '@/app/products/[id]/FavoriteControls'; // 作成したコンポーネント
 
 // 商品データの型定義
 type Product = ProductData; // 基本型から変更なし
@@ -56,15 +58,38 @@ function displayStars(avgRating: number) {
   return `${filledStars}${emptyStars}`;
 }
 
+// 商品IDに紐づくお気に入り登録有無を取得
+async function getFavoriteStatus(id: string): Promise<boolean> {
+  try {
+    // クッキーを取得してヘッダーに設定（サーバーコンポーネントでは自動送信されないため）
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_TOKEN)?.value;
+    const headers: HeadersInit = token ? { 'Cookie': `${AUTH_TOKEN}=${token}` } : {};
+
+    // お気に入り取得APIから商品IDの登録有無を取得（Step4で作成したGET API）
+    const res = await fetch(`${process.env.BASE_URL}/api/favorites/${id}`, {
+      cache: 'no-store',
+      headers: headers,
+    });
+
+    if (!res.ok) return false;
+    return await res.json(); // true または false が返ってくる
+  } catch (err) {
+    console.error('お気に入り状態取得エラー：', err);
+    return false;
+  }
+}
+
 // 商品詳細ページ
 export default async function ProductDetailPage(props: ProductDetailPageProps) {
   const resolvedParams = await props.params; // 非同期で取得されるためawaitが必要
   const productId = resolvedParams.id; // URLパラメータから商品IDを取得
 
-  // 商品データとレビューデータを並行して取得
-  const [product, reviewsResponse] = await Promise.all([
+  // 商品データ、レビューデータ、お気に入り状態を並行して取得
+  const [product, reviewsResponse, isFavorite] = await Promise.all([
     getProduct(productId),
     getReviews(productId),
+    getFavoriteStatus(productId), // ★ 追加
   ]);
 
 
@@ -140,7 +165,10 @@ export default async function ProductDetailPage(props: ProductDetailPageProps) {
               />
             )}
             {loggedIn && (
-              <button className="text-teal-800 hover:underline">&#9825; お気に入り追加</button>
+              <FavoriteControls
+                productId={product.id}
+                initialIsFavorite={isFavorite}
+              />
             )}
           </div>
 
