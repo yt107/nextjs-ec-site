@@ -11,7 +11,7 @@ if (!STRIPE_WEBHOOK_SECRET) throw new Error('環境変数STRIPE_WEBHOOK_SECRET�
 
 // Stripe初期化
 const stripe = new Stripe(SECRET_KEY, {
-  apiVersion: '【Stripe APIのバージョン】', // 最新のAPIバージョンを指定
+  apiVersion: '2026-09-30.endive', // 最新のAPIバージョンを指定
 });
 
 // Webhookイベントの処理
